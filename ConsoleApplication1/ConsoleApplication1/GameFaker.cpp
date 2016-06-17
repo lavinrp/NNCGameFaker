@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include <vector>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ struct point3D
 int main()
 {
 	//pipe
-	LPTSTR pipeName = TEXT("\\\\.\\pipe\\testPipe");
+	LPTSTR pipeName = TEXT("\\\\.\\pipe\\gamePipe");
 	HANDLE hPipe;
 
 	//create pipe
@@ -43,20 +44,42 @@ int main()
 		return 2;
 	}
 
+	double data[1];
+	DWORD bytesWritten;
+
+	cout << "Inpug fake game ID (should be unique)" << endl;
+	cout << "GameID: ";
+	cin >> data[0];
+
+	//write data
+	bool succcessfulWrite = WriteFile(
+		hPipe,
+		data,
+		sizeof(data),
+		&bytesWritten,
+		NULL);
+	///////////////////////////////
+	//	logic with written data	//
+	/////////////////////////////
+	if (succcessfulWrite) {
+		cout << "sent " << bytesWritten << endl;
+	} else {
+		cout << "failed to send data" << endl;
+	}
+
 	bool stop = false;
 
 	while (!stop)
 	{
 		//Data to write
-		double data[5];
+		double data[2];
 		DWORD bytesWritten;
 
-		cout << "input data. use -1 as 5th value to stop" << endl;
-		for (unsigned int i = 0; i < 5; ++i)
-		{
-			cout << "data " << i << ":";
-			cin >> data[i];
-		}
+		cout << "Input number of players and radios to read" << endl;
+		cout << "players: " << endl;
+		cin >> data[0];
+		cout << "radios: ";
+		cin >> data[1];
 
 		//write data
 		bool succcessfulWrite = WriteFile(
@@ -70,7 +93,7 @@ int main()
 		/////////////////////////////
 		if (succcessfulWrite)
 		{
-			cout << "sent " << bytesWritten << endl;
+			cout << "sent players and radios" << bytesWritten << endl;
 		}
 		else
 		{
@@ -80,11 +103,59 @@ int main()
 		//	EndLogic //
 		//////////////
 
-		//	stop write loop on key value
-		if (data[4] == -1)
-		{
-			stop = true;
+		for (unsigned int i = 0; i < data[0]; i++) {
+			cout << "Radio " << i << " data:" << endl;
+			cout << "x, y, z, voiceLevel(volume of voice), frequency, volume(of radio), on, broadcasting" << endl;
+			double radioData[8];
+			for (unsigned int j = 0; j < 8; j++) {
+				cin >> radioData[j];
+			}
+
+			//write data
+			bool succcessfulWrite = WriteFile(
+				hPipe,
+				radioData,
+				sizeof(radioData),
+				&bytesWritten,
+				NULL);
+			///////////////////////////////
+			//	logic with written data	//
+			/////////////////////////////
+			if (succcessfulWrite) {
+				cout << "sent radio" << bytesWritten << endl;
+			} else {
+				cout << "failed to send data" << endl;
+			}
 		}
+
+		for (unsigned int i = 0; i < data[1]; i++) {
+			cout << "Player " << i << " data: " << endl;
+			cout << "x, y, z, voiceLevel (voice volume), selectedRadio, gameID" << endl;
+			double playerData[6];
+
+			for (unsigned int j = 0; j < 6; j++) {
+				cin >> playerData[j];
+			}
+
+			//write data
+			bool succcessfulWrite = WriteFile(
+				hPipe,
+				playerData,
+				sizeof(playerData),
+				&bytesWritten,
+				NULL);
+			///////////////////////////////
+			//	logic with written data	//
+			/////////////////////////////
+			if (succcessfulWrite) {
+				cout << "sent radio" << bytesWritten << endl;
+			} else {
+				cout << "failed to send data" << endl;
+			}
+		}
+
+		cout << "stop? 1 = yes, 0 = no" << endl;
+		cin >> stop;
 	}
 
 	//close pipe
