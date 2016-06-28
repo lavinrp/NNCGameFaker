@@ -75,10 +75,10 @@ int main()
 		double data[2];
 		DWORD bytesWritten;
 
-		cout << "Input number of players and radios to read" << endl;
-		cout << "players: " << endl;
+		cout << "Input number of radios and players to read" << endl;
+		cout << "radios: " << endl;
 		cin >> data[0];
-		cout << "radios: ";
+		cout << "players: ";
 		cin >> data[1];
 
 		//write data
